@@ -527,3 +527,7 @@ h2 { font-size: clamp(1.9rem, 3.6vw, 2.9rem); }
   .biz-tabs { margin-top: -16px; }
   .panel__stats strong { font-size: 1.3rem; }
 }
+
+/* Contenedor del asistente real en la demo */
+.chat-mount { height: 600px; border-radius: 20px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+@media (max-width: 760px) { .chat-mount { height: 560px; } }

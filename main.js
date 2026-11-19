@@ -2,14 +2,20 @@
   'use strict';
 
   var root = document.documentElement;
+  var API = String(window.ASISTENTE_API || '').replace(/\/$/, '');
+  var DEMOS = [
+    { id: 'demo-dental', name: 'Clínica Dental Lumen', initials: 'L', color: '#0e8f86', tab: { es: 'Clínica dental', ca: 'Clínica dental' } },
+    { id: 'demo-gimnasio', name: 'Gimnàs Impuls', initials: 'I', color: '#d4501e', tab: { es: 'Gimnasio', ca: 'Gimnàs' } },
+    { id: 'demo-inmobiliaria', name: 'Inmobiliaria Horizonte', initials: 'H', color: '#6d4bd8', tab: { es: 'Inmobiliaria', ca: 'Immobiliària' } }
+  ];
   function $(id) { return document.getElementById(id); }
   function lang() { return root.getAttribute('lang') === 'ca' ? 'ca' : 'es'; }
   function t(k) { return window.I18N[lang()][k]; }
   function save(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   $('year').textContent = new Date().getFullYear();
+  var snip = $('snipSrc'); if (snip && API) snip.textContent = '"' + API + '/widget.js"';
 
   /* =================== Idioma =================== */
   function applyLang() {
@@ -27,7 +33,9 @@
       document.body.classList.add('lang-switching');
       setTimeout(function () {
         root.setAttribute('lang', l); save('codelab-lang', l);
-        applyLang(); renderTabs(); startDemo(current); startPreview();
+        applyLang(); renderTabs(); startPreview();
+        var api = window.CodelabAsistente && window.CodelabAsistente[current];
+        if (api) api.setLang(l);
         document.body.classList.remove('lang-switching');
       }, 220);
     });
@@ -80,111 +88,75 @@
     run();
   }
 
-  /* =================== Demo interactiva =================== */
-  var current = 'dental', bot = null, stats = null, busy = false, started = false;
+  /* =================== Demo con el asistente real =================== */
+  var current = DEMOS[0].id, counts = { msgs: 0, ai: 0, leads: 0 };
 
   function renderTabs() {
-    $('bizTabs').innerHTML = Object.keys(window.BOT_PROFILES).map(function (id) {
-      var p = window.BOT_PROFILES[id];
-      return '<button role="tab" data-biz="' + id + '" aria-selected="' + (id === current) + '" style="--c:' + p.color + '">' +
+    $('bizTabs').innerHTML = DEMOS.map(function (p) {
+      return '<button role="tab" data-biz="' + p.id + '" aria-selected="' + (p.id === current) + '" style="--c:' + p.color + '">' +
         '<span class="biz-tabs__av">' + p.initials + '</span>' + esc(p.tab[lang()]) + '</button>';
     }).join('');
     $('bizTabs').querySelectorAll('[data-biz]').forEach(function (b) {
       b.addEventListener('click', function () {
-        if (busy) return;
+        if (b.getAttribute('data-biz') === current) return;
         current = b.getAttribute('data-biz');
         $('bizTabs').querySelectorAll('[data-biz]').forEach(function (o) { o.setAttribute('aria-selected', String(o === b)); });
-        startDemo(current);
+        mount();
       });
     });
   }
 
-  function setStats() {
-    $('stConv').textContent = stats[0];
-    $('stLeads').textContent = stats[1];
-    $('stAuto').textContent = stats[2] + '%';
-  }
-  function bump(id) {
-    var el = $(id); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
-  }
-
-  function addMsg(who, text) {
-    var body = $('chatBody');
-    var el = document.createElement('div');
-    el.className = 'msg msg--' + who;
-    el.textContent = text;
-    body.appendChild(el);
-    body.scrollTo({ top: body.scrollHeight, behavior: reduced ? 'auto' : 'smooth' });
-    return el;
-  }
-  function typing(on) {
-    var body = $('chatBody'), ex = body.querySelector('.msg--typing');
-    if (on && !ex) { body.insertAdjacentHTML('beforeend', '<div class="msg msg--b msg--typing"><i></i><i></i><i></i></div>'); body.scrollTop = body.scrollHeight; }
-    if (!on && ex) ex.remove();
-  }
-  function renderChips() {
-    $('chatChips').innerHTML = bot.chips().map(function (c) { return '<button type="button">' + esc(c) + '</button>'; }).join('');
-    $('chatChips').querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { send(b.textContent); }); });
-  }
-
-  function startDemo(id) {
-    var p = window.BOT_PROFILES[id];
-    bot = window.createBot(id, lang());
-    stats = p.stats.slice();
-    started = false; busy = false;
-    $('chat').style.setProperty('--biz', p.color);
-    $('chatAv').textContent = p.initials;
-    $('chatName').textContent = p.name;
+  function resetPanel() {
+    var p = DEMOS.filter(function (d) { return d.id === current; })[0];
     $('panelName').textContent = p.name;
-    $('chatBody').innerHTML = '';
+    counts = { msgs: 0, ai: 0, leads: 0 };
+    ['stMsgs', 'stAi', 'stLeads'].forEach(function (id) { $(id).textContent = '0'; });
     $('lastQuery').innerHTML = '<span class="muted">' + t('pn.waiting') + '</span>';
     $('leadList').innerHTML = '<li class="muted">' + t('pn.noLeads') + '</li>';
-    setStats();
-    renderChips();
-    typing(true);
-    setTimeout(function () { typing(false); addMsg('b', bot.greet()); }, reduced ? 0 : 700);
+  }
+  function bump(id, val) { var el = $(id); el.textContent = val; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+
+  function mount() {
+    var box = $('chatMount');
+    box.innerHTML = '';
+    document.querySelectorAll('script[data-demo-widget]').forEach(function (s) { s.remove(); });
+    resetPanel();
+    if (!API || /REEMPLAZAR/.test(API)) { box.innerHTML = '<p class="muted" style="padding:24px">Configura ASISTENTE_API en config.js</p>'; return; }
+    var s = document.createElement('script');
+    s.src = API + '/widget.js?v=2';
+    s.setAttribute('data-negocio', current);
+    s.setAttribute('data-modo', 'integrado');
+    s.setAttribute('data-contenedor', '#chatMount');
+    s.setAttribute('data-idioma', lang());
+    s.setAttribute('data-demo-widget', '');
+    document.body.appendChild(s);
   }
 
-  function send(text) {
-    text = String(text || '').trim();
-    if (!text || busy) return;
-    busy = true;
-    addMsg('u', text);
-    $('chatInput').value = '';
-    if (!started) { started = true; stats[0]++; setStats(); bump('stConv'); }
-
-    var res = bot.reply(text);
-    var delay = reduced ? 0 : Math.min(1600, 500 + res.text.length * 9);
-    setTimeout(function () { typing(true); }, reduced ? 0 : 250);
-    setTimeout(function () {
-      typing(false);
-      addMsg('b', res.text);
-      busy = false;
-
-      if (res.intent && !res.lead && res.intent.id !== 'saludo' && res.intent.id !== 'gracias') {
-        var lq = $('lastQuery');
-        lq.innerHTML = '<span class="tag' + (res.unresolved ? ' tag--warn' : '') + '">' + esc(res.intent.label[lang()]) + '</span>' +
-          '<q>' + esc(text) + '</q>' + (res.unresolved ? '<small>' + t('pn.unresolved') + '</small>' : '');
-        lq.classList.remove('flash'); void lq.offsetWidth; lq.classList.add('flash');
-      }
-      if (res.lead) {
-        stats[1]++; setStats(); bump('stLeads');
-        var list = $('leadList'); var empty = list.querySelector('.muted'); if (empty) empty.remove();
-        list.insertAdjacentHTML('afterbegin',
-          '<li class="lead"><div class="lead__av">' + esc(res.lead.name.charAt(0)) + '</div>' +
-          '<div class="lead__info"><b>' + esc(res.lead.name) + '</b><span>' + esc(res.lead.phone) + '</span></div>' +
-          '<div class="lead__meta"><span class="tag">' + esc(res.lead.reason) + '</span><small>' + t('pn.new') + ' · ' + t('pn.now') + '</small></div></li>');
-      }
-      $('chatInput').focus({ preventScroll: true });
-    }, delay);
-  }
-
-  $('chatForm').addEventListener('submit', function (e) { e.preventDefault(); send($('chatInput').value); });
-  $('chatReset').addEventListener('click', function () { if (!busy) startDemo(current); });
+  window.addEventListener('codelab-asistente', function (e) {
+    var d = e.detail || {};
+    if (d.business !== current) return;
+    if (d.type === 'message' && d.role === 'user') {
+      bump('stMsgs', ++counts.msgs);
+      var lq = $('lastQuery');
+      lq.innerHTML = '<q>' + esc(d.text) + '</q>';
+      lq.classList.remove('flash'); void lq.offsetWidth; lq.classList.add('flash');
+    }
+    if (d.type === 'message' && d.role === 'assistant') bump('stAi', ++counts.ai);
+    if (d.type === 'lead' && d.lead) {
+      bump('stLeads', ++counts.leads);
+      var list = $('leadList'); var empty = list.querySelector('.muted'); if (empty) empty.remove();
+      var L = d.lead;
+      list.insertAdjacentHTML('afterbegin',
+        '<li class="lead"><div class="lead__av">' + esc((L.name || '?').charAt(0).toUpperCase()) + '</div>' +
+        '<div class="lead__info"><b>' + esc(L.name || '—') + '</b><span>' + esc(L.phone) + '</span></div>' +
+        '<div class="lead__meta">' + (L.reason ? '<span class="tag">' + esc(L.reason) + '</span>' : '') + '<small>' + t('pn.new') + ' · ' + t('pn.now') + '</small></div></li>');
+    }
+    if (d.type === 'reset') resetPanel();
+  });
 
   applyLang();
   renderTabs();
-  startDemo(current);
+  mount();
   startPreview();
   setTimeout(function () { root.classList.add('loaded'); }, 60);
 })();

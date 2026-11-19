@@ -1,11 +1,26 @@
 # Asistente IA para negocios · Codelab
 
-Página de venta del **Asistente IA de Codelab**: un asistente para la web de cada cliente que responde 24/7 con la información de su negocio, capta contactos y avisa al equipo cuando no sabe algo.
+Asistente con **inteligencia artificial** para la web de cualquier negocio: responde 24/7 solo con la información del negocio, en el idioma del cliente, y cuando alguien quiere cita o que le llamen, le pide nombre y teléfono y lo guarda como contacto.
 
-Incluye una **demo interactiva** con tres negocios ficticios (clínica dental, gimnasio e inmobiliaria): el visitante chatea como si fuera un cliente y, al lado, ve en directo el panel que recibiría el negocio (consultas, contactos captados).
+## Partes
 
-- `bot.js` – base de conocimiento de los negocios de ejemplo y el motor de la demo (respuestas por intención y captación de nombre y teléfono). Para añadir un negocio, copia uno de los perfiles de `BOT_PROFILES`.
-- `i18n.js` – textos en castellano y catalán, y el correo de contacto (`EMAIL`).
-- Tema claro y oscuro, adaptado a móvil.
+- **Página de venta** (`index.html`): con demo real (tres negocios ficticios) y panel en directo.
+- **Servidor** (`worker/`): Cloudflare Worker gratuito con Workers AI (Llama 3.3) y base de datos D1 en la UE.
+  - En producción: https://codelab-asistente.codelab-pauizel.workers.dev
+- **Widget para instalar en la web de un cliente** (una línea antes de `</body>`):
+  ```html
+  <script src="https://codelab-asistente.codelab-pauizel.workers.dev/widget.js" data-negocio="ID-DEL-NEGOCIO" defer></script>
+  ```
+  Opciones: `data-modo="integrado" data-contenedor="#id"` para mostrarlo dentro de la página; `data-idioma="es|ca|en"`.
+- **Panel de administración**: https://codelab-asistente.codelab-pauizel.workers.dev/admin
+  Crear y editar negocios (información, colores, saludos, sugerencias), ver y exportar contactos y leer las conversaciones.
 
-La demo funciona sin servidor y no envía datos a ningún sitio. La versión para clientes necesita un pequeño servidor que conecte el chat con un modelo de IA y guarde las conversaciones y los contactos.
+## Puesta en marcha y mantenimiento
+
+```bash
+cd worker
+npx wrangler secret put ADMIN_PASSWORD     # contraseña del panel (obligatoria)
+npx wrangler deploy                        # publicar cambios
+```
+
+Base de datos: `schema.sql` (tablas) y `seed.sql` (negocios de demostración). Los datos de los negocios marcados como demostración se borran cada día automáticamente.

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel · Asistente IA · Codelab</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231546d6'/><path d='M13 11l-5 5 5 5M19 11l5 5-5 5' stroke='white' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<style>
+:root{--bg:#f5f7fb;--s:#fff;--line:#e3e8f1;--ink:#0a1a3a;--text:#4a5671;--muted:#7a869e;--blue:#1546d6;--blue-soft:#eaf0ff;--good:#0f9d58;--warn:#c56a00;--bad:#d93a2b;--ease:cubic-bezier(.22,1,.36,1)}
+@media (prefers-color-scheme:dark){:root{--bg:#070c1c;--s:#0f1830;--line:#1d2848;--ink:#eef2ff;--text:#a8b3cf;--muted:#6f7b99;--blue:#4d7bff;--blue-soft:rgba(77,123,255,.14)}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+h1,h2,h3{color:var(--ink);letter-spacing:-.02em;line-height:1.2}
+a{color:var(--blue)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:10px;padding:10px 16px;background:var(--blue);color:#fff;font-weight:600;cursor:pointer;transition:filter .2s,transform .2s var(--ease)}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn.g{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.d{background:transparent;color:var(--bad);border:1px solid var(--line)}
+.btn.sm{padding:6px 11px;font-size:13px}
+input,textarea,select{width:100%;border:1px solid var(--line);background:var(--s);border-radius:10px;padding:10px 12px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+label{display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--ink)}
+label small{font-weight:400;color:var(--muted)}
+.card{background:var(--s);border:1px solid var(--line);border-radius:16px}
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:16px}
+.login form{width:min(380px,100%);padding:32px;display:grid;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--ink);font-size:18px}
+.logo svg{width:30px;height:30px}.logo small{display:block;font-size:12px;color:var(--blue);font-weight:600}
+.err{color:var(--bad);font-size:13px;min-height:1em}
+/* app */
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1180px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.tabs button{border:0;background:none;padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:600;color:var(--text)}
+.tabs button[aria-selected=true]{background:var(--s);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tabs b{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--bad);color:#fff;font-size:11px;margin-left:4px}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 60px}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.row h2{font-size:22px;margin-right:auto}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px}
+.stat{padding:18px}.stat strong{display:block;font-size:28px;color:var(--ink);letter-spacing:-.02em}.stat span{font-size:13px;color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+td b{color:var(--ink)}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--blue-soft);color:var(--blue)}
+.tag.demo{background:rgba(197,106,0,.12);color:var(--warn)}
+.st-nuevo{color:var(--bad)}.st-contactado{color:var(--warn)}.st-cerrado{color:var(--good)}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.biz{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.biz .card{padding:20px;display:grid;gap:10px;transition:transform .3s var(--ease),box-shadow .3s}
+.biz .card:hover{transform:translateY(-3px);box-shadow:0 20px 40px -25px rgba(0,0,0,.35)}
+.biz .hd{display:flex;align-items:center;gap:10px}.biz .av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700}
+.biz .nums{display:flex;gap:16px;font-size:13px}.biz .nums b{color:var(--ink);font-size:16px}
+.conv{display:grid;grid-template-columns:340px 1fr;gap:14px;min-height:520px}
+.conv .list{overflow:auto;max-height:70vh}
+.conv .item{padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.conv .item:hover,.conv .item.on{background:var(--blue-soft)}
+.conv .item small{color:var(--muted);font-size:12px}
+.conv .item p{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.thread{padding:18px;display:flex;flex-direction:column;gap:10px;overflow:auto;max-height:70vh}
+.msg{max-width:80%;padding:9px 13px;border-radius:14px;white-space:pre-wrap;font-size:14px}
+.msg.user{align-self:flex-end;background:var(--blue);color:#fff}
+.msg.assistant{align-self:flex-start;background:var(--bg);border:1px solid var(--line);color:var(--ink)}
+.msg small{display:block;font-size:11px;opacity:.7;margin-top:2px}
+form.edit{display:grid;gap:16px;padding:24px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+textarea{min-height:90px;resize:vertical}
+textarea.kb{min-height:300px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+pre.snip{background:#0a1a3a;color:#dbe6ff;padding:14px;border-radius:10px;font-size:12.5px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;opacity:0;transition:all .3s var(--ease);pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media (max-width:800px){.conv{grid-template-columns:1fr}.g2,.g3{grid-template-columns:1fr}th:nth-child(4),td:nth-child(4){display:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+'use strict';
+var KEY='cla-admin', pass=null; try{pass=sessionStorage.getItem(KEY)}catch(e){}
+var app=document.getElementById('app'), state={tab:'leads', biz:'', data:null, conv:null};
+var LOGO='<svg viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#1546d6"/><path d="M13 11l-5 5 5 5M19 11l5 5-5 5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(t){var e=document.getElementById('toast');e.textContent=t;e.classList.add('on');setTimeout(function(){e.classList.remove('on')},2200)}
+function when(s){if(!s)return'';var d=new Date(s.replace(' ','T')+'Z');return d.toLocaleString('es-ES',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}
+function api(path,opt){opt=opt||{};opt.headers=Object.assign({'Authorization':'Bearer '+pass,'Content-Type':'application/json'},opt.headers||{});
+  return fetch('/api/admin/'+path,opt).then(function(r){if(r.status===401){logout(true);throw new Error('401')}return r.json()})}
+function logout(bad){pass=null;try{sessionStorage.removeItem(KEY)}catch(e){}login(bad)}
+
+function login(bad){
+  app.innerHTML='<div class="login"><form class="card" id="lf"><div class="logo">'+LOGO+'<div>Codelab<small>Panel del Asistente IA</small></div></div>'+
+  '<label>Contraseña<input type="password" id="pw" autocomplete="current-password" required autofocus></label>'+
+  '<p class="err">'+(bad?'Contraseña incorrecta.':'')+'</p><button class="btn" type="submit">Entrar</button></form></div>';
+  document.getElementById('lf').onsubmit=function(e){e.preventDefault();pass=document.getElementById('pw').value;
+    api('summary').then(function(d){try{sessionStorage.setItem(KEY,pass)}catch(e){}state.data=d;shell()}).catch(function(){})};
+}
+
+function shell(){
+  var newLeads=(state.data.businesses||[]).reduce(function(a,b){return a+b.new_leads},0);
+  app.innerHTML='<header class="top"><div class="in"><div class="logo">'+LOGO+'<div>Codelab<small>Panel del Asistente IA</small></div></div>'+
+  '<nav class="tabs"><button data-t="leads">Contactos'+(newLeads?'<b>'+newLeads+'</b>':'')+'</button><button data-t="convs">Conversaciones</button><button data-t="biz">Negocios</button></nav>'+
+  '<button class="btn g sm" id="out">Salir</button></div></header><main id="main"></main>';
+  app.querySelectorAll('[data-t]').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.t===state.tab));b.onclick=function(){state.tab=b.dataset.t;state.conv=null;shell()}});
+  document.getElementById('out').onclick=function(){logout(false)};
+  ({leads:leads,convs:convs,biz:biz})[state.tab]();
+}
+function bizSelect(){
+  return '<select id="bsel" style="width:auto"><option value="">Todos los negocios</option>'+state.data.businesses.map(function(b){return'<option value="'+b.id+'"'+(state.biz===b.id?' selected':'')+'>'+esc(b.name)+'</option>'}).join('')+'</select>';
+}
+function bindSel(fn){var s=document.getElementById('bsel');if(s)s.onchange=function(){state.biz=s.value;fn()}}
+function bizName(id){var b=state.data.businesses.find(function(x){return x.id===id});return b?b.name:id}
+
+function leads(){
+  var m=document.getElementById('main'), B=state.data.businesses;
+  var tot=B.reduce(function(a,b){return a+b.leads},0), nw=B.reduce(function(a,b){return a+b.new_leads},0), conv=B.reduce(function(a,b){return a+b.conversations},0), today=B.reduce(function(a,b){return a+b.today},0);
+  m.innerHTML='<div class="stats"><div class="card stat"><strong>'+nw+'</strong><span>Contactos nuevos por llamar</span></div><div class="card stat"><strong>'+tot+'</strong><span>Contactos en total</span></div><div class="card stat"><strong>'+today+'</strong><span>Conversaciones últimas 24 h</span></div><div class="card stat"><strong>'+conv+'</strong><span>Conversaciones en total</span></div></div>'+
+  '<div class="row"><h2>Contactos</h2>'+bizSelect()+'<button class="btn g sm" id="csv">Exportar CSV</button></div><div class="card" id="lt"><p class="empty">Cargando…</p></div>';
+  bindSel(leads);
+  api('leads'+(state.biz?'?business='+state.biz:'')).then(function(d){
+    var L=d.leads||[]; var t=document.getElementById('lt');
+    if(!L.length){t.innerHTML='<p class="empty">Todavía no hay contactos. Cuando el asistente consiga el nombre y el teléfono de un cliente, aparecerá aquí.</p>';return}
+    t.innerHTML='<table><thead><tr><th>Cliente</th><th>Motivo</th><th>Negocio</th><th>Fecha</th><th>Estado</th><th></th></tr></thead><tbody>'+L.map(function(l){
+      return '<tr><td><b>'+esc(l.name||'Sin nombre')+'</b><br><a href="tel:'+esc(l.phone)+'">'+esc(l.phone)+'</a></td><td>'+esc(l.reason||'—')+'</td><td>'+esc(bizName(l.business_id))+'</td><td>'+when(l.created)+'</td>'+
+      '<td><select data-l="'+l.id+'" class="st-'+l.status+'" style="width:auto">'+['nuevo','contactado','cerrado'].map(function(s){return'<option'+(s===l.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select></td>'+
+      '<td>'+(l.conversation_id?'<button class="btn g sm" data-c="'+esc(l.conversation_id)+'">Ver chat</button>':'')+'</td></tr>'}).join('')+'</tbody></table>';
+    t.querySelectorAll('select[data-l]').forEach(function(s){s.onchange=function(){api('leads/'+s.dataset.l,{method:'PATCH',body:JSON.stringify({status:s.value})}).then(function(){s.className='st-'+s.value;toast('Estado actualizado');api('summary').then(function(d){state.data=d})})}});
+    t.querySelectorAll('[data-c]').forEach(function(b){b.onclick=function(){state.tab='convs';state.conv=b.dataset.c;shell()}});
+    document.getElementById('csv').onclick=function(){
+      var rows=[['Fecha','Negocio','Nombre','Teléfono','Motivo','Estado']].concat(L.map(function(l){return[l.created,bizName(l.business_id),l.name,l.phone,l.reason,l.status]}));
+      var csv=rows.map(function(r){return r.map(function(v){return'"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(';')}).join('\n');
+      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));a.download='contactos.csv';a.click();
+    };
+  });
+}
+
+function convs(){
+  var m=document.getElementById('main');
+  m.innerHTML='<div class="row"><h2>Conversaciones</h2>'+bizSelect()+'</div><div class="conv"><div class="card list" id="cl"><p class="empty">Cargando…</p></div><div class="card thread" id="th"><p class="empty">Elige una conversación.</p></div></div>';
+  bindSel(convs);
+  api('conversations'+(state.biz?'?business='+state.biz:'')).then(function(d){
+    var C=d.conversations||[], l=document.getElementById('cl');
+    if(!C.length){l.innerHTML='<p class="empty">Todavía no hay conversaciones.</p>';return}
+    l.innerHTML=C.map(function(c){var first='';try{first=(c.preview.match(/"content":"((?:[^"\\]|\\.)*)/)||[])[1]||''}catch(e){}
+      return '<div class="item" data-id="'+esc(c.id)+'"><small>'+esc(bizName(c.business_id))+' · '+when(c.updated)+(c.has_lead?' · <span class="tag">Contacto</span>':'')+'</small><p>'+esc(first.replace(/\\n/g,' ').replace(/\\"/g,'"'))+'</p></div>'}).join('');
+    l.querySelectorAll('.item').forEach(function(it){it.onclick=function(){state.conv=it.dataset.id;openConv()}});
+    if(state.conv)openConv();
+  });
+}
+function openConv(){
+  document.querySelectorAll('.conv .item').forEach(function(i){i.classList.toggle('on',i.dataset.id===state.conv)});
+  var th=document.getElementById('th');th.innerHTML='<p class="empty">Cargando…</p>';
+  api('conversations/'+state.conv).then(function(c){
+    if(c.error){th.innerHTML='<p class="empty">No encontrada.</p>';return}
+    th.innerHTML='<div class="row" style="margin:0 0 6px"><small style="margin-right:auto;color:var(--muted)">'+esc(bizName(c.business_id))+' · '+when(c.created)+(c.page?' · '+esc(c.page):'')+'</small><button class="btn d sm" id="dc">Borrar</button></div>'+
+      c.messages.map(function(x){return'<div class="msg '+x.role+'">'+esc(x.content)+'<small>'+(x.t?new Date(x.t).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'')+'</small></div>'}).join('');
+    document.getElementById('dc').onclick=function(){if(!confirm('¿Borrar esta conversación? No se puede deshacer.'))return;api('conversations/'+state.conv,{method:'DELETE'}).then(function(){state.conv=null;toast('Conversación borrada');convs()})};
+  });
+}
+
+function biz(){
+  var m=document.getElementById('main'), B=state.data.businesses;
+  m.innerHTML='<div class="row"><h2>Negocios</h2><button class="btn" id="nb">+ Nuevo negocio</button></div><div class="biz">'+(B.length?B.map(function(b){
+    return '<div class="card"><div class="hd"><span class="av" style="background:'+esc(b.color)+'">'+esc(b.name.charAt(0))+'</span><b style="color:var(--ink)">'+esc(b.name)+'</b>'+(b.demo?'<span class="tag demo">Demo</span>':'')+(b.active?'':'<span class="tag demo">Pausado</span>')+'</div>'+
+    '<div class="nums"><span><b>'+b.conversations+'</b> conversaciones</span><span><b>'+b.leads+'</b> contactos</span></div><div><button class="btn g sm" data-e="'+b.id+'">Editar</button></div></div>'}).join(''):'<p class="empty">Aún no hay negocios.</p>')+'</div>';
+  document.getElementById('nb').onclick=function(){edit(null)};
+  m.querySelectorAll('[data-e]').forEach(function(b){b.onclick=function(){api('businesses/'+b.dataset.e).then(edit)}});
+}
+function lines(j){try{return JSON.parse(j||'[]').join('\n')}catch(e){return''}}
+function edit(b){
+  var isNew=!b; b=b||{color:'#1546d6',active:1};
+  var origin=location.origin, m=document.getElementById('main');
+  m.innerHTML='<div class="row"><h2>'+(isNew?'Nuevo negocio':esc(b.name))+'</h2><button class="btn g sm" id="bk">← Volver</button></div>'+
+  '<form class="card edit" id="ef">'+
+  '<div class="g3"><label>Nombre del negocio<input name="name" required maxlength="120" value="'+esc(b.name)+'"></label>'+
+  '<label>Identificador <small>minúsculas y guiones, no se puede cambiar</small><input name="id" required pattern="[a-z0-9-]{2,60}" '+(isNew?'':'readonly')+' value="'+esc(b.id)+'" placeholder="clinica-lumen"></label>'+
+  '<label>Color<input name="color" type="color" value="'+esc(b.color)+'" style="height:44px;padding:4px"></label></div>'+
+  '<label>Información del negocio <small>Todo lo que el asistente debe saber: servicios, precios, horarios, dirección, normas, preguntas frecuentes… Solo responderá con esto.</small><textarea class="kb" name="knowledge" required>'+esc(b.knowledge)+'</textarea></label>'+
+  '<div class="g3"><label>Saludo en castellano<textarea name="greeting_es">'+esc(b.greeting_es)+'</textarea></label><label>Saludo en catalán<textarea name="greeting_ca">'+esc(b.greeting_ca)+'</textarea></label><label>Saludo en inglés<textarea name="greeting_en">'+esc(b.greeting_en)+'</textarea></label></div>'+
+  '<div class="g3"><label>Sugerencias en castellano <small>una por línea, máx. 6</small><textarea name="chips_es">'+esc(lines(b.chips_es))+'</textarea></label><label>Sugerencias en catalán<textarea name="chips_ca">'+esc(lines(b.chips_ca))+'</textarea></label><label>Sugerencias en inglés<textarea name="chips_en">'+esc(lines(b.chips_en))+'</textarea></label></div>'+
+  '<div class="g2"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="active" style="width:auto" '+(b.active?'checked':'')+'> Activo (el asistente responde)</label>'+
+  '<label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="demo" style="width:auto" '+(b.demo?'checked':'')+'> Negocio de demostración (sus datos se borran cada día)</label></div>'+
+  (isNew?'':'<label>Código para instalar en su web <small>pégalo antes de &lt;/body&gt;</small><pre class="snip" id="snip">&lt;script src="'+origin+'/widget.js" data-negocio="'+esc(b.id)+'" defer&gt;&lt;/script&gt;</pre></label>')+
+  '<div class="row" style="margin:0"><button class="btn" type="submit">Guardar</button>'+(isNew?'':'<button class="btn g" type="button" id="cp">Copiar código</button><a class="btn g" target="_blank" id="try" href="#">Probar</a><span style="flex:1"></span><button class="btn d" type="button" id="del">Borrar negocio</button>')+'</div></form>';
+  document.getElementById('bk').onclick=function(){biz()};
+  var f=document.getElementById('ef');
+  f.onsubmit=function(e){e.preventDefault();var d=Object.fromEntries(new FormData(f));d.active=f.active.checked;d.demo=f.demo.checked;
+    api('businesses/'+d.id,{method:'PUT',body:JSON.stringify(d)}).then(function(r){if(r.error){toast('Error: '+r.error);return}toast('Guardado');api('summary').then(function(s){state.data=s;api('businesses/'+d.id).then(edit)})})};
+  if(!isNew){
+    document.getElementById('cp').onclick=function(){navigator.clipboard.writeText(document.getElementById('snip').textContent).then(function(){toast('Código copiado')})};
+    document.getElementById('try').onclick=function(e){e.preventDefault();var w=window.open('','_blank');w.document.write('<!doctype html><meta charset=utf-8><title>Prueba · '+esc(b.name)+'</title><body style="font-family:system-ui;padding:40px;background:#f5f7fb"><h1>Prueba del asistente de '+esc(b.name)+'</h1><p>Abre el chat en la esquina inferior derecha.</p><script src="'+origin+'/widget.js" data-negocio="'+esc(b.id)+'"><\/script>');w.document.close()};
+    document.getElementById('del').onclick=function(){if(!confirm('¿Borrar '+b.name+' con todas sus conversaciones y contactos? No se puede deshacer.'))return;api('businesses/'+b.id,{method:'DELETE'}).then(function(){toast('Negocio borrado');api('summary').then(function(s){state.data=s;biz()})})};
+  }
+}
+
+if(pass){api('summary').then(function(d){state.data=d;shell()}).catch(function(){})}else login(false);
+})();
+</script>
+</body>
+</html>

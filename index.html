@@ -66,7 +66,7 @@
           </div>
           <ul class="hero__stats reveal" style="--d:.3s">
             <li><strong>24/7</strong><span data-i18n="hero.s1">Sin horarios ni festivos</span></li>
-            <li><strong data-i18n="hero.s2t">&lt; 2 s</strong><span data-i18n="hero.s2">Para cada respuesta</span></li>
+            <li><strong data-i18n="hero.s2t">IA real</strong><span data-i18n="hero.s2">Responde con tu información</span></li>
             <li><strong>ES · CA · EN</strong><span data-i18n="hero.s3">En el idioma del cliente</span></li>
           </ul>
         </div>
@@ -94,27 +94,13 @@
         <div class="section__head section__head--center reveal">
           <p class="kicker" data-i18n="d.kicker">Demo interactiva</p>
           <h2 data-i18n="d.title">Pruébalo como si fueras un cliente.</h2>
-          <p data-i18n="d.sub">Elige un negocio, haz preguntas o pide una cita. A la derecha verás lo que recibe el negocio en tiempo real.</p>
+          <p data-i18n="d.sub">Es el asistente real, con inteligencia artificial. Elige un negocio, pregunta lo que quieras o pide una cita, y mira a la derecha lo que recibe el negocio.</p>
         </div>
 
         <div class="biz-tabs reveal" role="tablist" id="bizTabs"></div>
 
         <div class="demo reveal">
-          <div class="chat" id="chat">
-            <div class="chat__head">
-              <span class="chat__av" id="chatAv">L</span>
-              <div class="chat__who"><b id="chatName"></b><small><i></i><span data-i18n="chat.online">En línea</span> · <span data-i18n="chat.ai">Asistente IA</span></small></div>
-              <button type="button" class="chat__reset" id="chatReset" data-i18n-aria="chat.reset" aria-label="Reiniciar conversación">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
-              </button>
-            </div>
-            <div class="chat__body" id="chatBody" aria-live="polite"></div>
-            <div class="chat__chips" id="chatChips"></div>
-            <form class="chat__form" id="chatForm" autocomplete="off">
-              <input id="chatInput" type="text" maxlength="200" placeholder="Escribe tu pregunta…" data-i18n-ph="chat.ph" aria-label="Mensaje">
-              <button type="submit" aria-label="Enviar" data-i18n-aria="chat.send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l16-8-6 16-2.5-6.5L4 12z"/></svg></button>
-            </form>
-          </div>
+          <div class="chat-mount" id="chatMount" aria-label="Chat"></div>
 
           <aside class="panel" aria-label="Panel del negocio">
             <div class="panel__head">
@@ -122,9 +108,9 @@
               <span class="panel__live"><i></i><span data-i18n="pn.live">En directo</span></span>
             </div>
             <div class="panel__stats">
-              <div><strong id="stConv">0</strong><span data-i18n="pn.conv">Conversaciones hoy</span></div>
+              <div><strong id="stMsgs">0</strong><span data-i18n="pn.msgs">Mensajes del cliente</span></div>
+              <div><strong id="stAi">0</strong><span data-i18n="pn.ai">Respuestas de la IA</span></div>
               <div><strong id="stLeads">0</strong><span data-i18n="pn.leads">Contactos captados</span></div>
-              <div><strong id="stAuto">0%</strong><span data-i18n="pn.auto">Resueltas sin ayuda</span></div>
             </div>
             <div class="panel__block">
               <p class="panel__label" data-i18n="pn.last">Última consulta</p>
@@ -132,9 +118,9 @@
             </div>
             <div class="panel__block">
               <p class="panel__label" data-i18n="pn.inbox">Contactos para llamar</p>
-              <ul id="leadList" class="leads"><li class="muted" data-i18n="pn.noLeads">Cuando el asistente consiga un contacto, aparecerá aquí.</li></ul>
+              <ul id="leadList" class="leads"><li class="muted" data-i18n="pn.noLeads">Pide una cita o deja tus datos y verás aquí cómo llega el contacto.</li></ul>
             </div>
-            <p class="panel__note" data-i18n="pn.note">Demostración con negocios ficticios. Los datos que escribas no se envían a ningún sitio.</p>
+            <p class="panel__note" data-i18n="pn.note">Asistente real con IA. Los negocios son ficticios: no escribas datos personales reales. Las conversaciones de prueba se borran cada día.</p>
           </aside>
         </div>
       </div>
@@ -200,9 +186,8 @@
           <div class="code__bar"><i></i><i></i><i></i><span>index.html</span></div>
 <pre><code><span class="c">&lt;!-- <span data-i18n="h.code">Asistente de Codelab</span> --&gt;</span>
 <span class="t">&lt;script</span>
-  <span class="a">src</span>=<span class="s">"…/asistente.js"</span>
+  <span class="a">src</span>=<span class="s" id="snipSrc">"…/widget.js"</span>
   <span class="a">data-negocio</span>=<span class="s">"clinica-lumen"</span>
-  <span class="a">data-color</span>=<span class="s">"#0e8f86"</span>
   <span class="a">defer</span><span class="t">&gt;&lt;/script&gt;</span></code></pre>
           <p class="code__note" data-i18n="h.note">Eso es todo. El asistente aparece en la esquina de tu web con tus colores.</p>
         </div>
@@ -255,8 +240,8 @@
     </div>
   </footer>
 
+  <script src="config.js"></script>
   <script src="i18n.js"></script>
-  <script src="bot.js"></script>
-  <script src="main.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
